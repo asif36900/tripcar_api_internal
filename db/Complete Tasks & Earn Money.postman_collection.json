@@ -1,0 +1,1244 @@
+{
+	"info": {
+		"_postman_id": "ae1eb5d2-a58c-4c7c-a6f1-00d1e3c75e91",
+		"name": "Complete Tasks & Earn Money",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "43129475",
+		"_collection_link": "https://planetary-resonance-27830.postman.co/workspace/MERN-stack-team~6d0a4f08-106f-48e3-a188-b873fc7860e6/collection/43129475-ae1eb5d2-a58c-4c7c-a6f1-00d1e3c75e91?action=share&source=collection_link&creator=43129475"
+	},
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Register",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = JSON.parse(responseBody);\r",
+									"postman.setEnvironmentVariable(\"authToken\", jsonData.accessToken);\r",
+									"postman.setEnvironmentVariable(\"userId\", jsonData.id);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "first_name",
+									"value": "{{firstName}}",
+									"description": "First Name (required)",
+									"type": "text"
+								},
+								{
+									"key": "last_name",
+									"value": "{{lastName}}",
+									"description": "Last Name (required)",
+									"type": "text"
+								},
+								{
+									"key": "email",
+									"value": "{{email}}",
+									"description": "Email Address (required)",
+									"type": "text"
+								},
+								{
+									"key": "phone",
+									"value": "{{phone}}",
+									"description": "Gender (Male/Female/Other) - (required) ",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "{{password}}",
+									"description": "Password (required)",
+									"type": "text"
+								},
+								{
+									"key": "confirm_password",
+									"value": "{{password}}",
+									"description": "Confirm Password (required)",
+									"type": "text"
+								},
+								{
+									"key": "gender",
+									"value": "Male",
+									"description": "Gender (Male/Female/Other) - (required) ",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/register",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();\r",
+									"pm.environment.set(\"authToken\", jsonData.accessToken);\r",
+									"pm.environment.set(\"userId\", jsonData.user.id);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "email",
+									"value": "{{email}}",
+									"description": "Email Address (required)",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "{{password}}",
+									"description": "Password (required)",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Users",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": []
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/get-all?page={{pageNum}}&limit={{noOfRecords}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"get-all"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "{{pageNum}}",
+									"description": "Page (required)"
+								},
+								{
+									"key": "limit",
+									"value": "{{noOfRecords}}",
+									"description": "Limit (required)"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Dashboard Stats",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": []
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/dashboard/stats",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"dashboard",
+								"stats"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get User Details",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": []
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/get-user-detail?id={{userId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"get-user-detail"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "{{userId}}",
+									"description": "Id (required)"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Change Password",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "current_password",
+									"value": "{{password}}",
+									"description": "Current Password (required)",
+									"type": "text"
+								},
+								{
+									"key": "new_password",
+									"value": "12345678",
+									"description": "New Password (required)",
+									"type": "text"
+								},
+								{
+									"key": "confirm_password",
+									"value": "12345678",
+									"description": "Confirm Password (required)",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/update/password",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"update",
+								"password"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update User Profile",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "first_name",
+									"value": "{{firstName}}",
+									"description": "First Name (required)",
+									"type": "text"
+								},
+								{
+									"key": "last_name",
+									"value": "{{lastName}}",
+									"description": "Last Name (required)",
+									"type": "text"
+								},
+								{
+									"key": "gender",
+									"value": "Male",
+									"description": "Gender (Male/Female/Other) - (required) ",
+									"type": "text"
+								},
+								{
+									"key": "phone",
+									"value": "{{phone}}",
+									"description": "Phone - (required) ",
+									"type": "text"
+								},
+								{
+									"key": "profile_image",
+									"description": "Profile Image (required)",
+									"type": "file",
+									"src": "/C:/Users/DZ-SYS-1/Pictures/1.jpg"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/update/profile",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"update",
+								"profile"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete User",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": []
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/delete-user?id={{userId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"delete-user"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "{{userId}}",
+									"description": "Id (required)"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Account",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": []
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/delete-account",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"delete-account"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Task",
+			"item": [
+				{
+					"name": "Create Task",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "title",
+									"value": "Complet User Survey",
+									"description": "Title (required)",
+									"type": "text"
+								},
+								{
+									"key": "description",
+									"value": "Earn money by completing a survey",
+									"description": "Description (required)",
+									"type": "text"
+								},
+								{
+									"key": "type",
+									"value": "Survey",
+									"description": "Type (required)",
+									"type": "text"
+								},
+								{
+									"key": "level",
+									"value": "Middle",
+									"description": "Level (required) ",
+									"type": "text"
+								},
+								{
+									"key": "reward_amount",
+									"value": "25",
+									"description": "Reward Amount (required)",
+									"type": "text"
+								},
+								{
+									"key": "duration",
+									"value": "5",
+									"description": "Duration (required)",
+									"type": "text"
+								},
+								{
+									"key": "deadline",
+									"value": "2026-6-26 12:15 am",
+									"description": "Deadline (required) ",
+									"type": "text"
+								},
+								{
+									"key": "requirements",
+									"value": "[\"Need email Account\", \"Atleast 2 year Old\"]",
+									"description": "Requirments (required)",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/task/create",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"task",
+								"create"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Task",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = JSON.parse(responseBody);\r",
+									"postman.setEnvironmentVariable(\"authToken\", jsonData.accessToken);\r",
+									"postman.setEnvironmentVariable(\"userId\", jsonData.id);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "task_id",
+									"value": "{{taskId}}",
+									"description": "Task Id (required)",
+									"type": "text"
+								},
+								{
+									"key": "title",
+									"value": "Complet User Survey",
+									"description": "Title (required)",
+									"type": "text"
+								},
+								{
+									"key": "description",
+									"value": "Earn money by completing a survey",
+									"description": "Description (required)",
+									"type": "text"
+								},
+								{
+									"key": "type",
+									"value": "Survey",
+									"description": "Type (required)",
+									"type": "text"
+								},
+								{
+									"key": "level",
+									"value": "Middle",
+									"description": "Level (required) ",
+									"type": "text"
+								},
+								{
+									"key": "reward_amount",
+									"value": "25",
+									"description": "Reward Amount (required)",
+									"type": "text"
+								},
+								{
+									"key": "duration",
+									"value": "5",
+									"description": "Duration (required)",
+									"type": "text"
+								},
+								{
+									"key": "deadline",
+									"value": "2026-6-26 12:15 am",
+									"description": "Deadline (required) ",
+									"type": "text"
+								},
+								{
+									"key": "requirements",
+									"value": "[\"Need email Account\", \"Atleast 2 year Old2\"]",
+									"description": "Requirments (required)",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/task/update",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"task",
+								"update"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Submit Task",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "task_id",
+									"value": "{{taskId}}",
+									"description": "Title (required)",
+									"type": "text"
+								},
+								{
+									"key": "description",
+									"value": "Earn money by completing a survey",
+									"description": "Description (required)",
+									"type": "text"
+								},
+								{
+									"key": "screenshots",
+									"description": "Proof Screenshot (required)",
+									"type": "file",
+									"src": [
+										"/C:/Users/Subhan-PC/Downloads/erik-mclean-I9qcFjyuJGw-unsplash.jpg",
+										"/C:/Users/Subhan-PC/Downloads/collabstr-7InuS_CreOY-unsplash.jpg"
+									]
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/task/submit",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"task",
+								"submit"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Tasks",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": []
+						},
+						"url": {
+							"raw": "{{baseUrl}}/task/all?page={{pageNum}}&limit={{noOfRecords}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"task",
+								"all"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "{{pageNum}}",
+									"description": "Page (required)"
+								},
+								{
+									"key": "limit",
+									"value": "{{noOfRecords}}",
+									"description": "Limit (required)"
+								},
+								{
+									"key": "searchTerm",
+									"value": "Customer1",
+									"description": "SearchTerm (optional)",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All  Submited Tasks",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": []
+						},
+						"url": {
+							"raw": "{{baseUrl}}/task/submit/all?page={{pageNum}}&limit={{noOfRecords}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"task",
+								"submit",
+								"all"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "{{pageNum}}",
+									"description": "Page (required)"
+								},
+								{
+									"key": "limit",
+									"value": "{{noOfRecords}}",
+									"description": "Limit (required)"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Task Details",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": []
+						},
+						"url": {
+							"raw": "{{baseUrl}}/task/get/detail?task_id={{taskId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"task",
+								"get",
+								"detail"
+							],
+							"query": [
+								{
+									"key": "task_id",
+									"value": "{{taskId}}",
+									"description": "Task Id (required)"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Task",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": []
+						},
+						"url": {
+							"raw": "{{baseUrl}}/task/delete?task_id={{userId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"task",
+								"delete"
+							],
+							"query": [
+								{
+									"key": "task_id",
+									"value": "{{userId}}",
+									"description": "Id (required)"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Submited Task Status",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "user_task_id",
+									"value": "{{taskId}}",
+									"description": "User Submited Task Id (required)"
+								},
+								{
+									"key": "status",
+									"value": "approved",
+									"description": "Status (required) - (approved/rejected)"
+								},
+								{
+									"key": "rejected_reason",
+									"value": "Its Not a orginal proof you are sent",
+									"description": "Rejected Reason (required)"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/task/update/status",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"task",
+								"update",
+								"status"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "KYC",
+			"item": [
+				{
+					"name": "Create/Update KYC Details",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "aadhaar_number",
+									"value": "ADV123450001",
+									"description": "Adhaar Number (required)",
+									"type": "text"
+								},
+								{
+									"key": "pan_number",
+									"value": "0000 0000 1112",
+									"description": "Pan Number (required)",
+									"type": "text"
+								},
+								{
+									"key": "adhaar_card_images",
+									"description": "Aadhar Card Image (required-only in creating kyc record)",
+									"type": "file",
+									"src": [
+										"/C:/Users/Subhan-PC/Downloads/adhaar 2.jfif",
+										"/C:/Users/Subhan-PC/Downloads/adhaar 1.jfif"
+									]
+								},
+								{
+									"key": "pan_card_images",
+									"description": "Pan Card Images (required-only in creating kyc record)",
+									"type": "file",
+									"src": [
+										"/C:/Users/Subhan-PC/Downloads/pan 2.jfif",
+										"/C:/Users/Subhan-PC/Downloads/pan 1.jfif"
+									]
+								},
+								{
+									"key": "passport_profile_images",
+									"description": "Passsport Profile Images (required-only in creating kyc record)",
+									"type": "file",
+									"src": "/C:/Users/Subhan-PC/Downloads/profile 1.jfif"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/update/details",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"update",
+								"details"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update KYC Status",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "kyc_id",
+									"value": "{{kycId}}",
+									"description": "Kyc id (required)",
+									"type": "text"
+								},
+								{
+									"key": "status",
+									"value": "approved",
+									"description": "Status (required) [approved,rejected]",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/update/status",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"update",
+								"status"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All KYC",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/auth/all?page={{pageNum}}&limit={{limit}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"all"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "{{pageNum}}",
+									"description": "Page Number (required)"
+								},
+								{
+									"key": "limit",
+									"value": "{{limit}}",
+									"description": "Limit (required)"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Withdrawal Requests",
+			"item": [
+				{
+					"name": "Create Withdrawal Request",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "amount",
+									"value": "{{amount}}",
+									"description": "Amount (required)",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/withdraw/create",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"withdraw",
+								"create"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Withdrawal Status",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "withdrawal_id",
+									"value": "{{withdrawId}}",
+									"description": "Withdraw id (required)",
+									"type": "text"
+								},
+								{
+									"key": "status",
+									"value": "approved",
+									"description": "Status (required) [approved,rejected]",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/withdraw/update/status",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"withdraw",
+								"update",
+								"status"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Withdrawal Requests",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/withdraw/all?page={{pageNum}}&limit={{limit}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"withdraw",
+								"all"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "{{pageNum}}",
+									"description": "Page Number (required)"
+								},
+								{
+									"key": "limit",
+									"value": "{{limit}}",
+									"description": "Limit (required)"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

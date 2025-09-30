@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import crypto from "crypto";
-import { v4 as uuidv4 } from "uuid";
+// import { v4 as uuidv4 } from "uuid";
 import Booking from "../database/models/Booking";
 import Payment from "../database/models/Payment";
 import sequelize from "../database/connection";
@@ -166,7 +166,7 @@ export const verifyAndCreateBooking = async (req: Request, res: Response) => {
     try {
       // 🔹 Generate unique IDs
       const bookingCode = `BOOK-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
-      const transactionId = `TXN-${uuidv4()}`;
+      const transactionId = `TXN-${Math.floor(Math.random() * 10000)}`;
       
       // Determine payment status based on amount paid (assuming amountPaid > 0 means 'completed' for now)
       // A more robust system might use finalTotalFare === amountPaid for 'completed'

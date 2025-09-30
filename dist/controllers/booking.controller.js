@@ -25,7 +25,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.verifyAndCreateBooking = void 0;
 const crypto_1 = __importDefault(require("crypto"));
-// import { v4 as uuidv4 } from "uuid";
+const uuid_1 = require("uuid");
 const Booking_1 = __importDefault(require("../database/models/Booking"));
 const Payment_1 = __importDefault(require("../database/models/Payment"));
 const connection_1 = __importDefault(require("../database/connection"));
@@ -159,7 +159,7 @@ const verifyAndCreateBooking = (req, res) => __awaiter(void 0, void 0, void 0, f
         try {
             // 🔹 Generate unique IDs
             const bookingCode = `BOOK-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
-            const transactionId = `TXN-${Math.floor(Math.random() * 10000)}`;
+            const transactionId = `TXN-${(0, uuid_1.v4)()}`;
             // Determine payment status based on amount paid (assuming amountPaid > 0 means 'completed' for now)
             // A more robust system might use finalTotalFare === amountPaid for 'completed'
             const paymentStatus = (bookingData.amountPaid > 0) ? "completed" : "pending";

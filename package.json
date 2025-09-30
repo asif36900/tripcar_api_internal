@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "description": "Booking Car Website Node.js API",
   "main": "index.js",
-  "type": "commonjs",
   "scripts": {
     "start": "ts-node ./dist/index.js",
     "dev": "ts-node-dev --respawn ./src/index.ts",

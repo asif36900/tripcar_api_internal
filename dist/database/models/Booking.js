@@ -8,10 +8,14 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 // models/Booking.ts
 const sequelize_typescript_1 = require("sequelize-typescript");
 const sequelize_1 = require("sequelize");
+const Payment_1 = __importDefault(require("./Payment"));
 let Booking = class Booking extends sequelize_typescript_1.Model {
 };
 __decorate([
@@ -272,6 +276,10 @@ __decorate([
     }),
     __metadata("design:type", Date)
 ], Booking.prototype, "deletedAt", void 0);
+__decorate([
+    (0, sequelize_typescript_1.HasOne)(() => Payment_1.default),
+    __metadata("design:type", Payment_1.default)
+], Booking.prototype, "payments", void 0);
 Booking = __decorate([
     (0, sequelize_typescript_1.Table)({
         timestamps: true,

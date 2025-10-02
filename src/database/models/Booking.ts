@@ -9,8 +9,11 @@ import {
   DeletedAt,
   ForeignKey,
   BelongsTo,
+  HasMany,
+  HasOne,
 } from "sequelize-typescript";
 import { DataTypes, Sequelize } from "sequelize";
+import Payment from "./Payment";
 
 @Table({
   timestamps: true,
@@ -249,6 +252,11 @@ class Booking extends Model {
     allowNull: true,
   })
   deletedAt!: Date;
+
+  @HasOne(() => Payment)
+  payments!: Payment;
 }
+
+
 
 export default Booking;

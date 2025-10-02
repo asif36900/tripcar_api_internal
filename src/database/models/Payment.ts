@@ -86,6 +86,7 @@ class Payment extends Model {
     allowNull: true,
   })
   updatedAt!: Date;
+
 }
 
 export default Payment;

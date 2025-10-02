@@ -27,17 +27,24 @@ if (environment === 'dev') {
         username: process.env.POSTGRES_USER,
         password: process.env.POSTGRES_PASSWORD,
         host: process.env.POSTGRES_HOST,
+        port: 41036,
         logging: false,
         models: [__dirname + '/models'],
         dialectOptions: {
             ssl: {
                 require: true,
-                rejectUnauthorized: 'production',
+                rejectUnauthorized: false,
+                // rejectUnauthorized: 'production',
             },
         },
         define: {
             schema: 'public',
-        }
+        },
+        pool: {
+            max: 5,
+            idle: 10000,
+            acquire: 30000,
+        },
     });
 }
 

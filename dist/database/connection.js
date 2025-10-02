@@ -39,7 +39,6 @@ else {
         username: process.env.POSTGRES_USER,
         password: process.env.POSTGRES_PASSWORD,
         host: process.env.POSTGRES_HOST,
-        port: 41036,
         logging: false,
         models: [__dirname + '/models'],
         dialectOptions: {

@@ -225,6 +225,7 @@ const verifyAndCreateBooking = (req, res) => __awaiter(void 0, void 0, void 0, f
         });
         try {
             yield (0, sendEmail_1.sendBookingConfirmationEmail)(bookingWithDetails);
+            yield (0, sendEmail_1.sendBookingConfirmationEmail)(bookingWithDetails, '');
         }
         catch (emailError) {
             console.error("Failed to send confirmation email:", emailError);

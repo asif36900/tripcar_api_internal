@@ -273,7 +273,7 @@ const createEmailHtml = (booking) => {
  * @param booking - The Sequelize Booking model instance after creation.
  * @returns {Promise<boolean>} True if email sent successfully, false otherwise.
  */
-const sendBookingConfirmationEmail = (booking) => __awaiter(void 0, void 0, void 0, function* () {
+const sendBookingConfirmationEmail = (booking, email) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         if (!booking.email) {
             console.warn('Cannot send email: Booking object is missing customer email.');
@@ -282,7 +282,8 @@ const sendBookingConfirmationEmail = (booking) => __awaiter(void 0, void 0, void
         const mailerSend = new mailersend_1.MailerSend({
             apiKey: process.env.MAILERSEND_API_KEY,
         });
-        const recipients = [new mailersend_1.Recipient(booking.email, booking.fullName || "Customer")];
+        const recieverEmail = email ? email : booking.email;
+        const recipients = [new mailersend_1.Recipient(recieverEmail, booking.fullName || "Customer")];
         const sender = new mailersend_1.Sender(process.env.MAILERSEND_FROM_EMAIL, "My Car Booking");
         const subject = `Your Booking is Confirmed! - Code: ${booking.bookingCode}`;
         const emailHtml = createEmailHtml(booking);

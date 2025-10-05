@@ -224,8 +224,8 @@ const verifyAndCreateBooking = (req, res) => __awaiter(void 0, void 0, void 0, f
             include: [{ model: Payment_1.default, as: "payments" }],
         });
         try {
-            yield (0, sendEmail_1.sendBookingConfirmationEmail)(bookingWithDetails);
-            yield (0, sendEmail_1.sendBookingConfirmationEmail)(bookingWithDetails, '');
+            yield (0, sendEmail_1.sendBookingConfirmationEmail)(bookingWithDetails, null);
+            yield (0, sendEmail_1.sendBookingConfirmationEmail)(bookingWithDetails, 'Infoeasygocab@gmail.com');
         }
         catch (emailError) {
             console.error("Failed to send confirmation email:", emailError);

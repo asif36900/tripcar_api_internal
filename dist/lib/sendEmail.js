@@ -171,9 +171,9 @@ const createEmailHtml = (booking) => {
 <body>
     <div style="padding: 20px;"> <div class="container">
             <div class="header">
-                <img src="${booking.image || 'https://placehold.co/600x200/555555/FFFFFF?text=Awesome+Car'}" 
+                <img src="${booking.image || 'https://placehold.co/600x200/ffc233/FFFFFF?text=Easy+Go+Cab'}" 
                      alt="${booking.vehicleName}" 
-                     onerror="this.onerror=null;this.src='https://placehold.co/600x200/555555/FFFFFF?text=Awesome+Car';">
+                     onerror="this.onerror=null;this.src='https://placehold.co/600x200/ffc233/FFFFFF?text=Easy+Go+Cab';">
                 <h1>Booking Confirmed!</h1>
             </div>
 

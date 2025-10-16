@@ -1,8 +1,10 @@
 // controllers/mailer.controller.ts
 
-import { MailerSend, EmailParams, Recipient, Sender } from "mailersend";
+import * as nodemailer from 'nodemailer';
+import { SendMailOptions } from 'nodemailer';
+// Removed unused imports: MailerSend, EmailParams, Recipient, Sender
 
-// Helper function to format date/time nicely
+// Helper function to format date/time nicely (KEPT AS IS)
 const formatDate = (dateString: string | null): string => {
     if (!dateString) return 'N/A';
     try {
@@ -16,8 +18,7 @@ const formatDate = (dateString: string | null): string => {
     }
 };
 
-// ⚠️ IMPORTANT: We're replacing the placeholder [variables] with the actual data from the 'booking' object.
-// We must ensure the booking object passed here contains all necessary fields.
+// HTML content generation function (KEPT AS IS)
 const createEmailHtml = (booking: any): string => {
     // Determine if it's a Round Trip, One Way, or Rental
     let tripDuration = '';
@@ -42,7 +43,8 @@ const createEmailHtml = (booking: any): string => {
         : '';
 
     const isAc = booking.ac === true || booking.ac === 'true' ? 'Yes' : 'No';
-
+console.log("=========================")
+console.log(booking.image)
     return `
 <!DOCTYPE html>
 <html lang="en">
@@ -52,7 +54,7 @@ const createEmailHtml = (booking: any): string => {
     <title>Car Booking Confirmation</title>
     <style>
         /* Import a standard, widely supported font */
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        @import url('[https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap](https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap)');
         
         /* General Reset and Body Styles */
         body { 
@@ -163,9 +165,9 @@ const createEmailHtml = (booking: any): string => {
 <body>
     <div style="padding: 20px;"> <div class="container">
             <div class="header">
-                <img src="${booking.image || 'https://placehold.co/600x200/ffc233/FFFFFF?text=Easy+Go+Cab'}" 
-                     alt="${booking.vehicleName}" 
-                     onerror="this.onerror=null;this.src='https://placehold.co/600x200/ffc233/FFFFFF?text=Easy+Go+Cab';">
+                <img src="https://img.freepik.com/free-photo/close-up-man-driving_23-2148622633.jpg?semt=ais_hybrid&w=740&q=80" 
+                    alt="${booking.vehicleName}" 
+                    onerror="this.onerror=null;this.src='[https://placehold.co/600x200/ffc233/FFFFFF?text=Easy+Go+Cab](https://placehold.co/600x200/ffc233/FFFFFF?text=Easy+Go+Cab)';">
                 <h1>Booking Confirmed!</h1>
             </div>
 
@@ -175,8 +177,23 @@ const createEmailHtml = (booking: any): string => {
 
                 <div class="section-title">Booking & Trip Details</div>
                 <div class="details-section">
+                    
                     <div class="detail-row">
+                        <span class="detail-label">Customer Name : </span>
+                        <span class="detail-value">${booking.fullName}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Customer Email : </span>
+                        <br/>
+                        <span class="detail-value">${booking.email}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Customer Phone : </span>
+                        <span class="detail-value">${booking.phone || 'N/A'}</span>
+                    </div>
+                    <div class="detail-row" style="margin-top: 15px;">
                         <span class="detail-label">Booking Code : </span>
+                        <br/>
                         <span class="detail-value">${booking.bookingCode}</span>
                     </div>
                     <div class="detail-row">
@@ -258,13 +275,27 @@ const createEmailHtml = (booking: any): string => {
     </div>
 </body>
 </html>
-    `;
+    `;
 };
+
+// --------------------------------------------------------------------------------
+// NodeMailer Implementation
+// --------------------------------------------------------------------------------
+
+// Create a Nodemailer transporter using SMTP for Gmail
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: process.env.GMAIL_EMAIL as string,     // Your Gmail address
+        pass: process.env.GMAIL_APP_PASSWORD as string, // Your App Password
+    },
+});
 
 
 /**
- * Sends a booking confirmation email to the customer.
- * @param booking - The Sequelize Booking model instance after creation.
+ * Sends a booking confirmation email to the customer using NodeMailer.
+ * @param booking - The booking object containing customer and trip details.
+ * @param email - Optional email to override the one in the booking object.
  * @returns {Promise<boolean>} True if email sent successfully, false otherwise.
  */
 export const sendBookingConfirmationEmail = async (booking: any, email?: any): Promise<boolean> => {
@@ -274,45 +305,49 @@ export const sendBookingConfirmationEmail = async (booking: any, email?: any): P
             return false;
         }
 
-        const mailerSend = new MailerSend({
-            apiKey: process.env.MAILERSEND_API_KEY as string,
-        });
-        const recieverEmail = email ? email : booking.email;
-        const recipients = [new Recipient(recieverEmail, booking.fullName || "Customer")];
-        const sender = new Sender(process.env.MAILERSEND_FROM_EMAIL as string, "My Car Booking");
+        // Check if environment variables are set
+        if (!process.env.GMAIL_EMAIL || !process.env.GMAIL_APP_PASSWORD) {
+             console.error('Nodemailer Error: GMAIL_EMAIL or GMAIL_APP_PASSWORD environment variables are not set.');
+             return false;
+        }
+
+        const receiverEmail = email ? email : booking.email;
+        const senderName = "My Car Booking";
+        const senderEmail = process.env.GMAIL_EMAIL as string; // Must match the `user` in transporter
         const subject = `Your Booking is Confirmed! - Code: ${booking.bookingCode}`;
 
         const emailHtml = createEmailHtml(booking);
 
         const emailText = `
-      Booking Confirmation
+        Booking Confirmation
 
-      Dear ${booking.fullName},
+        Dear ${booking.fullName},
 
-      Thank you for your booking.
+        Thank you for your booking.
 
-      Booking Code: ${booking.bookingCode}
-      Pickup: ${booking.pickupLocation} on ${formatDate(booking.pickupDate)} at ${booking.pickupTime}
-      Vehicle: ${booking.vehicleName} (${booking.vehicleType}, Seats: ${booking.seats})
-      Total Fare: ${booking.finalTotalFare} ${booking.currency}
-      Amount Paid: ${booking.amountPaid} ${booking.currency}
-      Payment Status: ${booking.paymentStatus}
-    `;
+        Booking Code: ${booking.bookingCode}
+        Pickup: ${booking.pickupLocation} on ${formatDate(booking.pickupDate)} at ${booking.pickupTime}
+        Vehicle: ${booking.vehicleName} (${booking.vehicleType}, Seats: ${booking.seats})
+        Total Fare: ${booking.finalTotalFare} ${booking.currency}
+        Amount Paid: ${booking.amountPaid} ${booking.currency}
+        Payment Status: ${booking.paymentStatus}
+        `;
 
-        const emailParams = new EmailParams()
-            .setFrom(sender)
-            .setTo(recipients)
-            .setSubject(subject)
-            .setHtml(emailHtml)
-            .setText(emailText);
+        const mailOptions: SendMailOptions = {
+            from: `"${senderName}" <${senderEmail}>`, // Sender address
+            to: receiverEmail,                        // List of receivers
+            subject: subject,                         // Subject line
+            html: emailHtml,                          // HTML body
+            text: emailText,                          // Plain text body for fallback
+        };
 
-        await mailerSend.email.send(emailParams);
+        const info = await transporter.sendMail(mailOptions);
 
-        console.log(`Booking confirmation email sent successfully to ${booking.email}`);
+        console.log(`Booking confirmation email sent successfully to ${receiverEmail}`);
+        // info.messageId and info.response can be helpful for debugging
         return true;
     } catch (error) {
-        console.error("MailerSend error:", error);
-        // Even if email fails, we don't want to stop the main booking process
+        console.error("Nodemailer error:", error);
         return false;
     }
 };

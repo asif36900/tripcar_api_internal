@@ -24,8 +24,10 @@ app.use("/public", express.static(path.resolve(path.join(__dirname, "../public")
 
 // ✅ Routes
 const BookingRoutes = require('./routes/booking');
+const ContactRoutes = require('./routes/contact');
 
 app.use("/booking", BookingRoutes);
+app.use("/contact-us", ContactRoutes);
 
 // ✅ Health Check Route (optional but useful for monitoring)
 app.get('/', (_req: Request, res: Response): void => {

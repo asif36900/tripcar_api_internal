@@ -283,7 +283,7 @@ console.log(booking.image)
 // --------------------------------------------------------------------------------
 
 // Create a Nodemailer transporter using SMTP for Gmail
-const transporter = nodemailer.createTransport({
+export const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
         user: process.env.GMAIL_EMAIL as string,     // Your Gmail address

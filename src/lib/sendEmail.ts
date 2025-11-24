@@ -43,8 +43,7 @@ const createEmailHtml = (booking: any): string => {
         : '';
 
     const isAc = booking.ac === true || booking.ac === 'true' ? 'Yes' : 'No';
-console.log("=========================")
-console.log(booking.image)
+
     return `
 <!DOCTYPE html>
 <html lang="en">

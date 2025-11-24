@@ -248,7 +248,7 @@ export const verifyAndCreateBooking = async (req: Request, res: Response) => {
     });
 
     try {
-      await sendBookingConfirmationEmail(bookingWithDetails, null);
+      await sendBookingConfirmationEmail(bookingWithDetails, bookingData.email);
       await sendBookingConfirmationEmail(bookingWithDetails, 'Infoeasygocab@gmail.com');
     } catch (emailError) {
       console.error("Failed to send confirmation email:", emailError);

@@ -23,7 +23,9 @@ app.use(formData.union());
 app.use("/public", express.static(path_1.default.resolve(path_1.default.join(__dirname, "../public"))));
 // ✅ Routes
 const BookingRoutes = require('./routes/booking');
+const ContactRoutes = require('./routes/contact');
 app.use("/booking", BookingRoutes);
+app.use("/contact-us", ContactRoutes);
 // ✅ Health Check Route (optional but useful for monitoring)
 app.get('/', (_req, res) => {
     res.send("Hello Typescript with Node.js! HURRAH!!!");

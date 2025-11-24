@@ -1,38 +1,5 @@
 "use strict";
 // controllers/mailer.controller.ts
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || (function () {
-    var ownKeys = function(o) {
-        ownKeys = Object.getOwnPropertyNames || function (o) {
-            var ar = [];
-            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
-            return ar;
-        };
-        return ownKeys(o);
-    };
-    return function (mod) {
-        if (mod && mod.__esModule) return mod;
-        var result = {};
-        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
-        __setModuleDefault(result, mod);
-        return result;
-    };
-})();
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -43,10 +10,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.sendBookingConfirmationEmail = exports.transporter = void 0;
-const nodemailer = __importStar(require("nodemailer"));
-// Removed unused imports: MailerSend, EmailParams, Recipient, Sender
-// Helper function to format date/time nicely (KEPT AS IS)
+exports.sendBookingConfirmationEmail = void 0;
+const mailersend_1 = require("mailersend");
+// Helper function to format date/time nicely
 const formatDate = (dateString) => {
     if (!dateString)
         return 'N/A';
@@ -61,7 +27,8 @@ const formatDate = (dateString) => {
         return dateString;
     }
 };
-// HTML content generation function (KEPT AS IS)
+// ⚠️ IMPORTANT: We're replacing the placeholder [variables] with the actual data from the 'booking' object.
+// We must ensure the booking object passed here contains all necessary fields.
 const createEmailHtml = (booking) => {
     // Determine if it's a Round Trip, One Way, or Rental
     let tripDuration = '';
@@ -93,7 +60,7 @@ const createEmailHtml = (booking) => {
     <title>Car Booking Confirmation</title>
     <style>
         /* Import a standard, widely supported font */
-        @import url('[https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap](https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap)');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
         
         /* General Reset and Body Styles */
         body { 
@@ -204,9 +171,9 @@ const createEmailHtml = (booking) => {
 <body>
     <div style="padding: 20px;"> <div class="container">
             <div class="header">
-                <img src="https://img.freepik.com/free-photo/close-up-man-driving_23-2148622633.jpg?semt=ais_hybrid&w=740&q=80" 
-                    alt="${booking.vehicleName}" 
-                    onerror="this.onerror=null;this.src='[https://placehold.co/600x200/ffc233/FFFFFF?text=Easy+Go+Cab](https://placehold.co/600x200/ffc233/FFFFFF?text=Easy+Go+Cab)';">
+                <img src="${booking.image || 'https://placehold.co/600x200/ffc233/FFFFFF?text=Easy+Go+Cab'}" 
+                     alt="${booking.vehicleName}" 
+                     onerror="this.onerror=null;this.src='https://placehold.co/600x200/ffc233/FFFFFF?text=Easy+Go+Cab';">
                 <h1>Booking Confirmed!</h1>
             </div>
 
@@ -216,23 +183,8 @@ const createEmailHtml = (booking) => {
 
                 <div class="section-title">Booking & Trip Details</div>
                 <div class="details-section">
-                    
                     <div class="detail-row">
-                        <span class="detail-label">Customer Name : </span>
-                        <span class="detail-value">${booking.fullName}</span>
-                    </div>
-                    <div class="detail-row">
-                        <span class="detail-label">Customer Email : </span>
-                        <br/>
-                        <span class="detail-value">${booking.email}</span>
-                    </div>
-                    <div class="detail-row">
-                        <span class="detail-label">Customer Phone : </span>
-                        <span class="detail-value">${booking.phone || 'N/A'}</span>
-                    </div>
-                    <div class="detail-row" style="margin-top: 15px;">
                         <span class="detail-label">Booking Code : </span>
-                        <br/>
                         <span class="detail-value">${booking.bookingCode}</span>
                     </div>
                     <div class="detail-row">
@@ -314,23 +266,11 @@ const createEmailHtml = (booking) => {
     </div>
 </body>
 </html>
-    `;
+    `;
 };
-// --------------------------------------------------------------------------------
-// NodeMailer Implementation
-// --------------------------------------------------------------------------------
-// Create a Nodemailer transporter using SMTP for Gmail
-exports.transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: process.env.GMAIL_EMAIL, // Your Gmail address
-        pass: process.env.GMAIL_APP_PASSWORD, // Your App Password
-    },
-});
 /**
- * Sends a booking confirmation email to the customer using NodeMailer.
- * @param booking - The booking object containing customer and trip details.
- * @param email - Optional email to override the one in the booking object.
+ * Sends a booking confirmation email to the customer.
+ * @param booking - The Sequelize Booking model instance after creation.
  * @returns {Promise<boolean>} True if email sent successfully, false otherwise.
  */
 const sendBookingConfirmationEmail = (booking, email) => __awaiter(void 0, void 0, void 0, function* () {
@@ -339,44 +279,41 @@ const sendBookingConfirmationEmail = (booking, email) => __awaiter(void 0, void 
             console.warn('Cannot send email: Booking object is missing customer email.');
             return false;
         }
-        // Check if environment variables are set
-        if (!process.env.GMAIL_EMAIL || !process.env.GMAIL_APP_PASSWORD) {
-            console.error('Nodemailer Error: GMAIL_EMAIL or GMAIL_APP_PASSWORD environment variables are not set.');
-            return false;
-        }
-        const receiverEmail = email ? email : booking.email;
-        const senderName = "My Car Booking";
-        const senderEmail = process.env.GMAIL_EMAIL; // Must match the `user` in transporter
+        const mailerSend = new mailersend_1.MailerSend({
+            apiKey: process.env.MAILERSEND_API_KEY,
+        });
+        const recieverEmail = email ? email : booking.email;
+        const recipients = [new mailersend_1.Recipient(recieverEmail, booking.fullName || "Customer")];
+        const sender = new mailersend_1.Sender(process.env.MAILERSEND_FROM_EMAIL, "My Car Booking");
         const subject = `Your Booking is Confirmed! - Code: ${booking.bookingCode}`;
         const emailHtml = createEmailHtml(booking);
         const emailText = `
-        Booking Confirmation
+      Booking Confirmation
 
-        Dear ${booking.fullName},
+      Dear ${booking.fullName},
 
-        Thank you for your booking.
+      Thank you for your booking.
 
-        Booking Code: ${booking.bookingCode}
-        Pickup: ${booking.pickupLocation} on ${formatDate(booking.pickupDate)} at ${booking.pickupTime}
-        Vehicle: ${booking.vehicleName} (${booking.vehicleType}, Seats: ${booking.seats})
-        Total Fare: ${booking.finalTotalFare} ${booking.currency}
-        Amount Paid: ${booking.amountPaid} ${booking.currency}
-        Payment Status: ${booking.paymentStatus}
-        `;
-        const mailOptions = {
-            from: `"${senderName}" <${senderEmail}>`, // Sender address
-            to: receiverEmail, // List of receivers
-            subject: subject, // Subject line
-            html: emailHtml, // HTML body
-            text: emailText, // Plain text body for fallback
-        };
-        const info = yield exports.transporter.sendMail(mailOptions);
-        console.log(`Booking confirmation email sent successfully to ${receiverEmail}`);
-        // info.messageId and info.response can be helpful for debugging
+      Booking Code: ${booking.bookingCode}
+      Pickup: ${booking.pickupLocation} on ${formatDate(booking.pickupDate)} at ${booking.pickupTime}
+      Vehicle: ${booking.vehicleName} (${booking.vehicleType}, Seats: ${booking.seats})
+      Total Fare: ${booking.finalTotalFare} ${booking.currency}
+      Amount Paid: ${booking.amountPaid} ${booking.currency}
+      Payment Status: ${booking.paymentStatus}
+    `;
+        const emailParams = new mailersend_1.EmailParams()
+            .setFrom(sender)
+            .setTo(recipients)
+            .setSubject(subject)
+            .setHtml(emailHtml)
+            .setText(emailText);
+        yield mailerSend.email.send(emailParams);
+        console.log(`Booking confirmation email sent successfully to ${booking.email}`);
         return true;
     }
     catch (error) {
-        console.error("Nodemailer error:", error);
+        console.error("MailerSend error:", error);
+        // Even if email fails, we don't want to stop the main booking process
         return false;
     }
 });

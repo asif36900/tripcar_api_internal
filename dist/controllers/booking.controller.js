@@ -29,7 +29,6 @@ const uuid_1 = require("uuid");
 const Booking_1 = __importDefault(require("../database/models/Booking"));
 const Payment_1 = __importDefault(require("../database/models/Payment"));
 const connection_1 = __importDefault(require("../database/connection"));
-const chrome_aws_lambda_1 = __importDefault(require("chrome-aws-lambda"));
 const sendEmail_1 = require("../lib/sendEmail");
 const verifyAndCreateBooking = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -219,72 +218,33 @@ exports.verifyAndCreateBooking = verifyAndCreateBooking;
 //     });
 //   }
 // }
-const generateReciept = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const { receiptData } = req.body;
-        if (!receiptData) {
-            return res.status(400).json({ success: false, message: "Missing receipt data" });
-        }
-        const generateHTML = (data) => `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <meta charset="utf-8">
-        <title>Receipt</title>
-        <style>
-          body { font-family: Arial, sans-serif; padding: 20px; }
-          .receipt { width: 400px; margin: auto; border: 1px solid #333; padding: 20px; }
-          table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-          td, th { border: 1px solid #333; padding: 8px; }
-          .total { font-weight: bold; }
-        </style>
-      </head>
-      <body>
-        <div class="receipt">
-          <h2>Booking Receipt</h2>
-          <p><strong>Booking ID:</strong> ${data.bookingId}</p>
-          <p><strong>Customer:</strong> ${data.customerName}</p>
-          <p><strong>Mobile:</strong> ${data.mobile}</p>
-          <p><strong>Email:</strong> ${data.email}</p>
-          <p><strong>Service:</strong> ${data.serviceType}</p>
-          <p><strong>Car:</strong> ${data.car}</p>
-          <p><strong>Pickup:</strong> ${data.pickup}</p>
-          <p><strong>Destination:</strong> ${data.destination}</p>
-          <p><strong>Date:</strong> ${data.date}</p>
-          <p><strong>Time:</strong> ${data.time}</p>
-
-          <table>
-            <tr><td>Total Fare</td><td>${data.totalFare}</td></tr>
-            <tr><td>Paid Amount</td><td>${data.paidAmount}</td></tr>
-            <tr class="total"><td>Remaining</td><td>${data.remainingAmount}</td></tr>
-            <tr><td>Transaction ID</td><td>${data.transactionId}</td></tr>
-          </table>
-        </div>
-      </body>
-      </html>
-    `;
-        // Launch Chromium from chrome-aws-lambda
-        const browser = yield chrome_aws_lambda_1.default.puppeteer.launch({
-            args: chrome_aws_lambda_1.default.args,
-            defaultViewport: chrome_aws_lambda_1.default.defaultViewport,
-            executablePath: yield chrome_aws_lambda_1.default.executablePath,
-            headless: chrome_aws_lambda_1.default.headless,
-        });
-        const page = yield browser.newPage();
-        yield page.setContent(generateHTML(receiptData), {
-            waitUntil: "networkidle0",
-        });
-        const imageBuffer = yield page.screenshot({ fullPage: true });
-        yield browser.close();
-        res.set({
-            "Content-Type": "image/png",
-            "Content-Disposition": "attachment; filename=receipt.png",
-        });
-        return res.send(imageBuffer);
-    }
-    catch (error) {
-        console.error("Receipt Error =>", error);
-        return res.status(500).json({ success: false, message: "Failed to generate receipt" });
-    }
-});
+const pdfkit_1 = __importDefault(require("pdfkit"));
+const generateReciept = (req, res) => {
+    const { receiptData } = req.body;
+    if (!receiptData)
+        return res.status(400).json({ message: "Missing data" });
+    const doc = new pdfkit_1.default({ size: "A4", margin: 50 });
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", `attachment; filename=receipt-${receiptData.bookingId}.pdf`);
+    doc.pipe(res);
+    doc.fontSize(20).text("Booking Receipt", { align: "center" }).moveDown();
+    doc.fontSize(12).text(`Booking ID: ${receiptData.bookingId}`);
+    doc.text(`Customer: ${receiptData.customerName}`);
+    doc.text(`Mobile: ${receiptData.mobile}`);
+    doc.text(`Email: ${receiptData.email}`);
+    doc.text(`Service: ${receiptData.serviceType}`);
+    doc.text(`Car: ${receiptData.car}`);
+    doc.text(`Pickup: ${receiptData.pickup}`);
+    doc.text(`Destination: ${receiptData.destination}`);
+    doc.text(`Date: ${receiptData.date}`);
+    doc.text(`Time: ${receiptData.time}`);
+    doc.moveDown();
+    doc.text(`Total Fare: ${receiptData.totalFare}`);
+    doc.text(`Paid Amount: ${receiptData.paidAmount}`);
+    doc.text(`Remaining Amount: ${receiptData.remainingAmount}`);
+    doc.text(`Transaction ID: ${receiptData.transactionId}`);
+    doc.moveDown();
+    doc.text("Thank you for choosing our service!", { align: "center" });
+    doc.end();
+};
 exports.generateReciept = generateReciept;

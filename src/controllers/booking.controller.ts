@@ -236,78 +236,42 @@ export const verifyAndCreateBooking = async (req: Request, res: Response) => {
 //   }
 // }
 
+import PDFDocument from "pdfkit";
 
-export const generateReciept = async (req: Request, res: Response) => {
-  try {
-    const { receiptData } = req.body;
+export const generateReciept = (req: Request, res: Response) => {
+  const { receiptData } = req.body;
+  if (!receiptData) return res.status(400).json({ message: "Missing data" });
 
-    if (!receiptData) {
-      return res.status(400).json({ success: false, message: "Missing receipt data" });
-    }
+  const doc = new PDFDocument({ size: "A4", margin: 50 });
 
-    const generateHTML = (data: any) => `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <meta charset="utf-8">
-        <title>Receipt</title>
-        <style>
-          body { font-family: Arial, sans-serif; padding: 20px; }
-          .receipt { width: 400px; margin: auto; border: 1px solid #333; padding: 20px; }
-          table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-          td, th { border: 1px solid #333; padding: 8px; }
-          .total { font-weight: bold; }
-        </style>
-      </head>
-      <body>
-        <div class="receipt">
-          <h2>Booking Receipt</h2>
-          <p><strong>Booking ID:</strong> ${data.bookingId}</p>
-          <p><strong>Customer:</strong> ${data.customerName}</p>
-          <p><strong>Mobile:</strong> ${data.mobile}</p>
-          <p><strong>Email:</strong> ${data.email}</p>
-          <p><strong>Service:</strong> ${data.serviceType}</p>
-          <p><strong>Car:</strong> ${data.car}</p>
-          <p><strong>Pickup:</strong> ${data.pickup}</p>
-          <p><strong>Destination:</strong> ${data.destination}</p>
-          <p><strong>Date:</strong> ${data.date}</p>
-          <p><strong>Time:</strong> ${data.time}</p>
+  res.setHeader("Content-Type", "application/pdf");
+  res.setHeader(
+    "Content-Disposition",
+    `attachment; filename=receipt-${receiptData.bookingId}.pdf`
+  );
 
-          <table>
-            <tr><td>Total Fare</td><td>${data.totalFare}</td></tr>
-            <tr><td>Paid Amount</td><td>${data.paidAmount}</td></tr>
-            <tr class="total"><td>Remaining</td><td>${data.remainingAmount}</td></tr>
-            <tr><td>Transaction ID</td><td>${data.transactionId}</td></tr>
-          </table>
-        </div>
-      </body>
-      </html>
-    `;
+  doc.pipe(res);
 
-    // Launch Chromium from chrome-aws-lambda
-    const browser = await chromium.puppeteer.launch({
-      args: chromium.args,
-      defaultViewport: chromium.defaultViewport,
-      executablePath: await chromium.executablePath,
-      headless: chromium.headless,
-    });
+  doc.fontSize(20).text("Booking Receipt", { align: "center" }).moveDown();
+  doc.fontSize(12).text(`Booking ID: ${receiptData.bookingId}`);
+  doc.text(`Customer: ${receiptData.customerName}`);
+  doc.text(`Mobile: ${receiptData.mobile}`);
+  doc.text(`Email: ${receiptData.email}`);
+  doc.text(`Service: ${receiptData.serviceType}`);
+  doc.text(`Car: ${receiptData.car}`);
+  doc.text(`Pickup: ${receiptData.pickup}`);
+  doc.text(`Destination: ${receiptData.destination}`);
+  doc.text(`Date: ${receiptData.date}`);
+  doc.text(`Time: ${receiptData.time}`);
 
-    const page = await browser.newPage();
-    await page.setContent(generateHTML(receiptData), {
-      waitUntil: "networkidle0",
-    });
+  doc.moveDown();
+  doc.text(`Total Fare: ${receiptData.totalFare}`);
+  doc.text(`Paid Amount: ${receiptData.paidAmount}`);
+  doc.text(`Remaining Amount: ${receiptData.remainingAmount}`);
+  doc.text(`Transaction ID: ${receiptData.transactionId}`);
 
-    const imageBuffer = await page.screenshot({ fullPage: true });
-    await browser.close();
+  doc.moveDown();
+  doc.text("Thank you for choosing our service!", { align: "center" });
 
-    res.set({
-      "Content-Type": "image/png",
-      "Content-Disposition": "attachment; filename=receipt.png",
-    });
-
-    return res.send(imageBuffer);
-  } catch (error) {
-    console.error("Receipt Error =>", error);
-    return res.status(500).json({ success: false, message: "Failed to generate receipt" });
-  }
+  doc.end();
 };

@@ -197,7 +197,9 @@ const generateReciept = (req, res) => __awaiter(void 0, void 0, void 0, function
     `;
         // LAUNCH PUPPETEER
         const browser = yield puppeteer_1.default.launch({
-            args: ["--no-sandbox", "--disable-setuid-sandbox"]
+            headless: true,
+            args: ["--no-sandbox", "--disable-setuid-sandbox"],
+            executablePath: puppeteer_1.default.executablePath() // IMPORTANT
         });
         const page = yield browser.newPage();
         yield page.setContent(generateHTML(receiptData), { waitUntil: "networkidle0" });

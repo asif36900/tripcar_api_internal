@@ -206,8 +206,11 @@ export const generateReciept = async (req: Request, res: Response) => {
 
     // LAUNCH PUPPETEER
     const browser = await puppeteer.launch({
-      args: ["--no-sandbox", "--disable-setuid-sandbox"]
+      headless: true,
+      args: ["--no-sandbox", "--disable-setuid-sandbox"],
+      executablePath: puppeteer.executablePath() // IMPORTANT
     });
+
     const page = await browser.newPage();
 
     await page.setContent(generateHTML(receiptData), { waitUntil: "networkidle0" });

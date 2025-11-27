@@ -29,7 +29,7 @@ const uuid_1 = require("uuid");
 const Booking_1 = __importDefault(require("../database/models/Booking"));
 const Payment_1 = __importDefault(require("../database/models/Payment"));
 const connection_1 = __importDefault(require("../database/connection"));
-const puppeteer_1 = __importDefault(require("puppeteer"));
+const chrome_aws_lambda_1 = __importDefault(require("chrome-aws-lambda"));
 const sendEmail_1 = require("../lib/sendEmail");
 const verifyAndCreateBooking = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -148,13 +148,83 @@ const verifyAndCreateBooking = (req, res) => __awaiter(void 0, void 0, void 0, f
     }
 });
 exports.verifyAndCreateBooking = verifyAndCreateBooking;
+// export const generateReciept = async (req: Request, res: Response) => {
+//   try {
+//     const { receiptData } = req.body;
+//     if (!receiptData) {
+//       return res.status(400).json({ success: false, message: "Missing receipt data" });
+//     }
+//     // HTML TEMPLATE
+//     const generateHTML = (data:any) => `
+//       <!DOCTYPE html>
+//       <html>
+//       <head>
+//         <meta charset="utf-8">
+//         <title>Receipt</title>
+//         <style>
+//           body { font-family: Arial, sans-serif; padding: 20px; }
+//           .receipt { width: 400px; margin: auto; border: 1px solid #333; padding: 20px; }
+//           h2 { text-align: center; }
+//           table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+//           td, th { border: 1px solid #333; padding: 8px; text-align: left; }
+//           .total { font-weight: bold; }
+//           .footer { text-align: center; margin-top: 20px; font-size: 0.9em; color: #555; }
+//         </style>
+//       </head>
+//       <body>
+//         <div class="receipt">
+//           <h2>Booking Receipt</h2>
+//           <p><strong>Booking ID:</strong> ${data.bookingId}</p>
+//           <p><strong>Customer:</strong> ${data.customerName}</p>
+//           <p><strong>Mobile:</strong> ${data.mobile}</p>
+//           <p><strong>Email:</strong> ${data.email}</p>
+//           <p><strong>Service:</strong> ${data.serviceType}</p>
+//           <p><strong>Car:</strong> ${data.car}</p>
+//           <p><strong>Pickup:</strong> ${data.pickup}</p>
+//           <p><strong>Destination:</strong> ${data.destination}</p>
+//           <p><strong>Date:</strong> ${data.date}</p>
+//           <p><strong>Time:</strong> ${data.time}</p>
+//           <table>
+//             <tr><td>Total Fare</td><td>${data.totalFare}</td></tr>
+//             <tr><td>Paid Amount</td><td>${data.paidAmount}</td></tr>
+//             <tr class="total"><td>Remaining Amount</td><td>${data.remainingAmount}</td></tr>
+//             <tr><td>Transaction ID</td><td>${data.transactionId}</td></tr>
+//           </table>
+//           <div class="footer">Thank you for choosing our service!</div>
+//         </div>
+//       </body>
+//       </html>
+//     `;
+//     // LAUNCH PUPPETEER
+//     const browser = await puppeteer.launch({
+//       headless: true,
+//       args: ["--no-sandbox", "--disable-setuid-sandbox"],
+//       executablePath: puppeteer.executablePath() // IMPORTANT
+//     });
+//     const page = await browser.newPage();
+//     await page.setContent(generateHTML(receiptData), { waitUntil: "networkidle0" });
+//     const imageBuffer = await page.screenshot({ fullPage: true });
+//     await browser.close();
+//     // SEND IMAGE BACK
+//     res.set({
+//       "Content-Type": "image/png",
+//       "Content-Disposition": "attachment; filename=receipt.png"
+//     });
+//     res.send(imageBuffer);
+//   } catch (error) {
+//     console.error(error);
+//     return res.status(500).json({
+//       success: false,
+//       message: "Failed to generate receipt",
+//     });
+//   }
+// }
 const generateReciept = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { receiptData } = req.body;
         if (!receiptData) {
             return res.status(400).json({ success: false, message: "Missing receipt data" });
         }
-        // HTML TEMPLATE
         const generateHTML = (data) => `
       <!DOCTYPE html>
       <html>
@@ -164,11 +234,9 @@ const generateReciept = (req, res) => __awaiter(void 0, void 0, void 0, function
         <style>
           body { font-family: Arial, sans-serif; padding: 20px; }
           .receipt { width: 400px; margin: auto; border: 1px solid #333; padding: 20px; }
-          h2 { text-align: center; }
           table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-          td, th { border: 1px solid #333; padding: 8px; text-align: left; }
+          td, th { border: 1px solid #333; padding: 8px; }
           .total { font-weight: bold; }
-          .footer { text-align: center; margin-top: 20px; font-size: 0.9em; color: #555; }
         </style>
       </head>
       <body>
@@ -184,40 +252,39 @@ const generateReciept = (req, res) => __awaiter(void 0, void 0, void 0, function
           <p><strong>Destination:</strong> ${data.destination}</p>
           <p><strong>Date:</strong> ${data.date}</p>
           <p><strong>Time:</strong> ${data.time}</p>
+
           <table>
             <tr><td>Total Fare</td><td>${data.totalFare}</td></tr>
             <tr><td>Paid Amount</td><td>${data.paidAmount}</td></tr>
-            <tr class="total"><td>Remaining Amount</td><td>${data.remainingAmount}</td></tr>
+            <tr class="total"><td>Remaining</td><td>${data.remainingAmount}</td></tr>
             <tr><td>Transaction ID</td><td>${data.transactionId}</td></tr>
           </table>
-          <div class="footer">Thank you for choosing our service!</div>
         </div>
       </body>
       </html>
     `;
-        // LAUNCH PUPPETEER
-        const browser = yield puppeteer_1.default.launch({
-            headless: true,
-            args: ["--no-sandbox", "--disable-setuid-sandbox"],
-            executablePath: puppeteer_1.default.executablePath() // IMPORTANT
+        // Launch Chromium from chrome-aws-lambda
+        const browser = yield chrome_aws_lambda_1.default.puppeteer.launch({
+            args: chrome_aws_lambda_1.default.args,
+            defaultViewport: chrome_aws_lambda_1.default.defaultViewport,
+            executablePath: yield chrome_aws_lambda_1.default.executablePath,
+            headless: chrome_aws_lambda_1.default.headless,
         });
         const page = yield browser.newPage();
-        yield page.setContent(generateHTML(receiptData), { waitUntil: "networkidle0" });
+        yield page.setContent(generateHTML(receiptData), {
+            waitUntil: "networkidle0",
+        });
         const imageBuffer = yield page.screenshot({ fullPage: true });
         yield browser.close();
-        // SEND IMAGE BACK
         res.set({
             "Content-Type": "image/png",
-            "Content-Disposition": "attachment; filename=receipt.png"
+            "Content-Disposition": "attachment; filename=receipt.png",
         });
-        res.send(imageBuffer);
+        return res.send(imageBuffer);
     }
     catch (error) {
-        console.error(error);
-        return res.status(500).json({
-            success: false,
-            message: "Failed to generate receipt",
-        });
+        console.error("Receipt Error =>", error);
+        return res.status(500).json({ success: false, message: "Failed to generate receipt" });
     }
 });
 exports.generateReciept = generateReciept;

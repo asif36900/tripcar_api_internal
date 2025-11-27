@@ -7,5 +7,5 @@ const express_1 = __importDefault(require("express"));
 const booking_controller_1 = require("../controllers/booking.controller");
 const router = express_1.default.Router();
 router.post("/create", booking_controller_1.verifyAndCreateBooking);
-// router.get("/all", fetchRoles);
+router.post("/generate-receipt", booking_controller_1.generateReciept);
 module.exports = router;

@@ -1,8 +1,8 @@
 import express from 'express';
-import { verifyAndCreateBooking } from '../controllers/booking.controller';
+import { generateReciept, verifyAndCreateBooking } from '../controllers/booking.controller';
 const router = express.Router();
 
 router.post("/create", verifyAndCreateBooking);
-// router.get("/all", fetchRoles);
+router.post("/generate-receipt", generateReciept);
 
 module.exports = router;

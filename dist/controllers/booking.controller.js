@@ -23,111 +23,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.verifyAndCreateBooking = void 0;
+exports.generateReciept = exports.verifyAndCreateBooking = void 0;
 const crypto_1 = __importDefault(require("crypto"));
 const uuid_1 = require("uuid");
 const Booking_1 = __importDefault(require("../database/models/Booking"));
 const Payment_1 = __importDefault(require("../database/models/Payment"));
 const connection_1 = __importDefault(require("../database/connection"));
+const puppeteer_1 = __importDefault(require("puppeteer"));
 const sendEmail_1 = require("../lib/sendEmail");
-// export const verifyAndCreateBooking = async (req: Request, res: Response) => {
-//   try {
-//     const {
-//       razorpay_order_id,
-//       razorpay_payment_id,
-//       razorpay_signature,
-//       ...bookingData
-//     } = req.body;
-//     console.log("Frontend booking payload:", bookingData);
-//     // ⚠️ If you are in TESTING without Razorpay signature, keep this commented
-//     if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
-//       return res.status(400).json({ success: false, message: "Missing required fields" });
-//     }
-//     const sign = `${razorpay_order_id}|${razorpay_payment_id}`;
-//     const expectedSign = crypto
-//       .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET as string)
-//       .update(sign)
-//       .digest("hex");
-//     if (razorpay_signature !== expectedSign) {
-//       return res.status(400).json({
-//         success: false,
-//         message: "Invalid signature. Possible fake payment.",
-//       });
-//     }
-//     // ✅ Transaction: Save Booking + Payment
-//     const transaction = await sequelize.transaction();
-//     try {
-//       // 🔹 Generate unique IDs
-//       const bookingCode = `BOOK-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
-//       const transactionId = `TXN-${uuidv4()}`;
-//       // 1️⃣ Save booking
-//       const booking = await Booking.create(
-//         {
-//           bookingCode,
-//           // mapping frontend → model fields
-//           fullName: bookingData.name,
-//           email: bookingData.email,
-//           phone: bookingData.contact,
-//           bookingType: bookingData.bookingType,
-//           pickupLocation: bookingData.pickupLocation,
-//           destination: bookingData.destination,
-//           tripType: bookingData.tripType,
-//           pickupDate: bookingData.pickupDate,
-//           pickupTime: bookingData.pickupTime,
-//           returnDate: bookingData.returnDate || null,
-//           returnTime: bookingData.returnTime || null,
-//           rentalPackage: bookingData.rentalPackage || null,
-//           passengers: bookingData.passengers,
-//           vehicleId: bookingData.id,
-//           vehicleName: bookingData.vehicleName,
-//           vehicleType: bookingData.type,
-//           ac: bookingData.ac,
-//           seats: bookingData.seats,
-//           image: bookingData.image,
-//           baseRate: bookingData.baseRate,
-//           extraKmRate: bookingData.extraKmRate,
-//           features: bookingData.features,
-//           amount: bookingData.amount,
-//           currency: bookingData.currency || "INR",
-//           paymentStatus: "completed",
-//         },
-//         { transaction }
-//       );
-//       // 2️⃣ Save payment
-//       await Payment.create(
-//         {
-//           transactionId,
-//           bookingId: booking.id,
-//           razorpay_order_id: razorpay_order_id || "TEST_ORDER",
-//           razorpay_payment_id: razorpay_payment_id || "TEST_PAYMENT",
-//           razorpay_signature: razorpay_signature || "TEST_SIGNATURE",
-//           amount: bookingData.amount,
-//           currency: bookingData.currency || "INR",
-//           status: "success",
-//         },
-//         { transaction }
-//       );
-//       await transaction.commit();
-//       return res.status(200).json({
-//         success: true,
-//         message: "Payment verified & booking saved successfully",
-//         data: { booking, transactionId, bookingCode },
-//       });
-//     } catch (error) {
-//       await transaction.rollback();
-//       console.error("Booking save failed:", error);
-//       return res.status(500).json({
-//         success: false,
-//         message: "Failed to save booking/payment",
-//       });
-//     }
-//   } catch (err) {
-//     console.error("Error verifying Razorpay payment:", err);
-//     return res.status(500).json({ success: false, message: "Server error verifying payment" });
-//   }
-// };
-// Booking Api Controller
-// ... imports ...
 const verifyAndCreateBooking = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const _a = req.body, { razorpay_order_id, razorpay_payment_id, razorpay_signature } = _a, bookingData = __rest(_a, ["razorpay_order_id", "razorpay_payment_id", "razorpay_signature"]);
@@ -245,3 +148,74 @@ const verifyAndCreateBooking = (req, res) => __awaiter(void 0, void 0, void 0, f
     }
 });
 exports.verifyAndCreateBooking = verifyAndCreateBooking;
+const generateReciept = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { receiptData } = req.body;
+        if (!receiptData) {
+            return res.status(400).json({ success: false, message: "Missing receipt data" });
+        }
+        // HTML TEMPLATE
+        const generateHTML = (data) => `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <title>Receipt</title>
+        <style>
+          body { font-family: Arial, sans-serif; padding: 20px; }
+          .receipt { width: 400px; margin: auto; border: 1px solid #333; padding: 20px; }
+          h2 { text-align: center; }
+          table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+          td, th { border: 1px solid #333; padding: 8px; text-align: left; }
+          .total { font-weight: bold; }
+          .footer { text-align: center; margin-top: 20px; font-size: 0.9em; color: #555; }
+        </style>
+      </head>
+      <body>
+        <div class="receipt">
+          <h2>Booking Receipt</h2>
+          <p><strong>Booking ID:</strong> ${data.bookingId}</p>
+          <p><strong>Customer:</strong> ${data.customerName}</p>
+          <p><strong>Mobile:</strong> ${data.mobile}</p>
+          <p><strong>Email:</strong> ${data.email}</p>
+          <p><strong>Service:</strong> ${data.serviceType}</p>
+          <p><strong>Car:</strong> ${data.car}</p>
+          <p><strong>Pickup:</strong> ${data.pickup}</p>
+          <p><strong>Destination:</strong> ${data.destination}</p>
+          <p><strong>Date:</strong> ${data.date}</p>
+          <p><strong>Time:</strong> ${data.time}</p>
+          <table>
+            <tr><td>Total Fare</td><td>${data.totalFare}</td></tr>
+            <tr><td>Paid Amount</td><td>${data.paidAmount}</td></tr>
+            <tr class="total"><td>Remaining Amount</td><td>${data.remainingAmount}</td></tr>
+            <tr><td>Transaction ID</td><td>${data.transactionId}</td></tr>
+          </table>
+          <div class="footer">Thank you for choosing our service!</div>
+        </div>
+      </body>
+      </html>
+    `;
+        // LAUNCH PUPPETEER
+        const browser = yield puppeteer_1.default.launch({
+            args: ["--no-sandbox", "--disable-setuid-sandbox"]
+        });
+        const page = yield browser.newPage();
+        yield page.setContent(generateHTML(receiptData), { waitUntil: "networkidle0" });
+        const imageBuffer = yield page.screenshot({ fullPage: true });
+        yield browser.close();
+        // SEND IMAGE BACK
+        res.set({
+            "Content-Type": "image/png",
+            "Content-Disposition": "attachment; filename=receipt.png"
+        });
+        res.send(imageBuffer);
+    }
+    catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            success: false,
+            message: "Failed to generate receipt",
+        });
+    }
+});
+exports.generateReciept = generateReciept;
